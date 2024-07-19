@@ -1,0 +1,63 @@
+name: Database Migration
+
+on: [push]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    services:
+        mysql:
+          image: mysql:8.0
+          ports:
+            - 3306:3306
+          env:
+            MYSQL_ROOT_PASSWORD: rootpassword
+            MYSQL_USER: testuser
+            MYSQL_PASSWORD: testpassword
+          options: >-
+            --name mysql-db
+            --health-cmd="mysqladmin ping --silent"
+            --health-interval=10s
+            --health-timeout=5s
+            --health-retries=3
+  
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {30..0}; do
+            if docker exec mysql-db mysql -u testuser -ptestpassword -e "SELECT 1" > /dev/null 2>&1; then
+                break
+            fi
+            echo 'MySQL not ready yet...'
+            sleep 1
+        done
+    
+    - name: Initialize Database Schemas and Grant Permissions
+      run: |
+        docker exec -i mysql-db mysql -u root -prootpassword < $GITHUB_WORKSPACE/init.sql
+
+    - name: Display All Databases and Users Table Schema
+      run: |
+        echo "Listing all databases and 'users' table schema for each database:"
+        for db in schema1 schema2 schema3 schema4 schema5 schema6 schema7 schema8 schema9 schema10; do
+            echo "Checking database: $db"
+            docker exec -i mysql-db mysql -u testuser -ptestpassword -e "USE $db; SHOW CREATE TABLE users;"
+        done
+
+    # Run the migrations
+    
+
+
+    # Display All Databases and Users Table Schema (again) to confirm the migration
+    - name: Display All Databases and Users Table Schema
+      run: |
+        echo "Listing all databases and 'users' table schema for each database:"
+        for db in schema1 schema2 schema3 schema4 schema5 schema6 schema7 schema8 schema9 schema10; do
+            echo "Checking database: $db"
+            docker exec -i mysql-db mysql -u testuser -ptestpassword -e "USE $db; SHOW CREATE TABLE users;"
+        done
+   
