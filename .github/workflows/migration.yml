@@ -49,7 +49,14 @@ jobs:
         done
 
     # Run the migrations
-    
+    - name: Run Database Migrations
+      run: |
+        echo "Running schema migrations for each database:"
+        for db in schema1 schema2 schema3 schema4 schema5 schema6 schema7 schema8 schema9 schema10; do
+            echo "Updating database: $db"
+            docker run -e INSTALL_MYSQL=true -v $GITHUB_WORKSPACE/migrations:/liquibase/changelog liquibase/liquibase \
+            --url="jdbc:mysql://172.17.0.1:3306/$db" --changeLogFile=changelog/changelog.yml --username=root --password=rootpassword update 
+        done
 
 
     # Display All Databases and Users Table Schema (again) to confirm the migration

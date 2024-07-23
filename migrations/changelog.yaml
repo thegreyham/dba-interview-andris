@@ -1,0 +1,14 @@
+databaseChangeLog:
+- changeSet:
+      id:  1
+      author:  andris.smits
+      labels: dba-interview
+      context: dba-interview
+      comment: add age(int) column to the users table
+      changes:
+      - addColumn:
+          tableName: users
+          columns:
+          - column:
+              name: age
+              type: int
